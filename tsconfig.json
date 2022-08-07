@@ -1,6 +1,6 @@
 {
 	"compilerOptions": {
-		"target": "es6",
+		"target": "ESNext",
 		"lib": ["DOM", "ES7", "ES6", "ES2020", "ESNext.AsyncIterable"],
 		"experimentalDecorators": true,
 		"emitDecoratorMetadata": true,
