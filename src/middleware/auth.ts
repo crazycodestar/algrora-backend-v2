@@ -4,7 +4,7 @@ import { SECRET } from "../config/environment";
 
 const authorization = async (req: Request, _: any, next: NextFunction) => {
 	const bearer = req.headers.authorization || "";
-	if (!bearer) return next();
+	if (!bearer?.startsWith("Bearer ")) return next();
 	const token = bearer.split(" ")[1];
 	try {
 		const user = await jwt.verify(token, SECRET);

@@ -1,6 +1,7 @@
 import { registerValidation } from "../validation/userValidation";
 import { addUser } from "../models/user";
 import { UserInputError } from "apollo-server-express";
+import { Icontext } from "../interface/common";
 
 type addUserInput = {
 	userInput: {
@@ -13,7 +14,11 @@ type addUserInput = {
 
 export default {
 	Mutation: {
-		addUser: async (_: any, { userInput }: addUserInput, { userData }: any) => {
+		addUser: async (
+			_: any,
+			{ userInput }: addUserInput,
+			{ userData }: Icontext
+		) => {
 			try {
 				await registerValidation.validateAsync(userInput);
 			} catch (err) {
