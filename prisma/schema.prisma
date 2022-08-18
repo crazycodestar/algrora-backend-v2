@@ -16,62 +16,135 @@ model User {
   username      String         @unique @db.VarChar(255)
   password      String         @db.VarChar(255)
   activated     Boolean        @default(false)
-  imageUrl      String?        @db.VarChar(255)
+  imageUri      ImageUri?
   notifications Notification[]
-  address    String
+  address       String
   store         Store?
+  roles         Role[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
 }
 
 model Notification {
-  id                Int    @id @default(autoincrement())
+  id                Int      @id @default(autoincrement())
   topic             String
   message           String
   notificationId    Int
-  notificationOwner User   @relation(fields: [notificationId], references: [id])
+  notificationOwner User     @relation(fields: [notificationId], references: [id])
+  createdAt         DateTime @default(now())
 }
 
 model Store {
-  id         Int         @id @default(autoincrement())
-  isActive   Boolean?    @default(true)
-  products   Product[]
-  orderTypes OrderType[]
-  ownerId    Int         @unique
-  owner      User        @relation(fields: [ownerId], references: [id])
+  id                 Int       @id @default(autoincrement())
+  isActive           Boolean?  @default(true)
+  products           Product[]
+  orders             Order[]
+  logs               Log[]
+  ownerId            Int       @unique
+  owner              User      @relation(fields: [ownerId], references: [id])
+  oneDayDeliveryExp  DateTime
+  sameDayDeliveryExp DateTime
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 }
 
 model Product {
-  id          Int         @id @default(autoincrement())
-  imageUrl    String?      @db.VarChar(255)
-  orderTypes  OrderType[]
-  description String?
-  type        ProductType
-  storeId     Int         @unique
-  store       Store       @relation(fields: [storeId], references: [id])
+  id              Int              @id @default(autoincrement())
+  name            String           @db.VarChar(255)
+  isOrder         Boolean
+  hasADayDelivery Boolean          @default(false)
+  basePrice       Int
+  productContents ProductContent[]
+  storeId         Int
+  store           Store            @relation(fields: [storeId], references: [id])
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
 }
 
-enum ProductType {
-  ORDER
-  PRODUCT
+model Order {
+  id              Int                   @id @default(autoincrement())
+  name            String                @db.VarChar(255)
+  isOrder         Boolean
+  isADayDelivery  Boolean
+  createdAt       DateTime              @default(now())
+  storeId         Int
+  store           Store                 @relation(fields: [storeId], references: [id])
+  productContents ProductContentFixed[]
 }
 
-model OrderType {
-  id         Int                @id @default(autoincrement())
-  type       OrderDeliveryType
-  options    OrderTypeOptions[]
-  expiration DateTime?
-  storeId    Int                @unique
-  store      Store              @relation(fields: [storeId], references: [id])
-  productId  Int
-  product    Product            @relation(fields: [productId], references: [id])
+model Log {
+  id              Int                   @id @default(autoincrement())
+  name            String                @db.VarChar(255)
+  isOrder         Boolean
+  isADayDelivery  Boolean
+  createdAt       DateTime              @default(now())
+  storeId         Int
+  store           Store                 @relation(fields: [storeId], references: [id])
+  productContents ProductContentFixed[]
 }
 
-model OrderTypeOptions {
-  option      String
-  orderTypeId Int       @unique
-  orderType   OrderType @relation(fields: [orderTypeId], references: [id])
+model ProductContentFixed {
+  id       Int            @id @default(autoincrement())
+  imageUri ImageUri[]
+  quantity Int
+  name     String         @db.VarChar(255)
+  price    Int?
+  orderId  Int
+  order    Order          @relation(fields: [orderId], references: [id])
+  logId    Int
+  log      Log            @relation(fields: [logId], references: [id])
+  options  KeyValuePair[]
 }
 
-enum OrderDeliveryType {
-  DAYWAIT
-  SAMEDAY
+model ProductContent {
+  id        Int        @id @default(autoincrement())
+  productId Int
+  product   Product    @relation(fields: [productId], references: [id])
+  name      String     @db.VarChar(255)
+  imageUri  ImageUri[]
+  price     Int?
+  options   Option[]
+}
+
+model Option {
+  id               Int            @id @default(autoincrement())
+  options          KeyValuePair[]
+  productContentId Int
+  productContent   ProductContent @relation(fields: [productContentId], references: [id])
+}
+
+model KeyValuePair {
+  id                    Int                 @id @default(autoincrement())
+  key                   String              @db.VarChar(255)
+  amount                Int?                @default(0)
+  description           String?
+  isOneDayDelivery      Boolean?            @default(false)
+  optionId              Int
+  option                Option              @relation(fields: [optionId], references: [id])
+  productContentFixedId Int
+  productContentFixed   ProductContentFixed @relation(fields: [productContentFixedId], references: [id])
+}
+
+model ImageUri {
+  id                    Int                 @id @default(autoincrement())
+  url                   String              @db.VarChar(255)
+  productContentId      Int
+  productContent        ProductContent      @relation(fields: [productContentId], references: [id])
+  userId                Int                 @unique
+  user                  User                @relation(fields: [userId], references: [id])
+  productContentFixedId Int
+  productContentFixed   ProductContentFixed @relation(fields: [productContentFixedId], references: [id])
+}
+
+model Role {
+  id     Int      @id @default(autoincrement())
+  role   RoleEnum
+  userId Int
+  user   User     @relation(fields: [userId], references: [id])
+}
+
+enum RoleEnum {
+  USER
+  ADMIN
+  SELLER
 }
