@@ -1,8 +1,12 @@
 import generateCookiesMiddleware from "../middleware/cookies";
 
 type cookieClientType = ReturnType<typeof generateCookiesMiddleware>;
+export type roles = "ADMIN" | "USER" | "STORE";
 
-export interface Icontext {
-	userData: string;
+export interface IContext {
+	userData: null | {
+		id: number;
+		roles: Array<roles>;
+	};
 	cookieClient: cookieClientType;
 }

@@ -3,7 +3,7 @@ import { makeExecutableSchema } from "@graphql-tools/schema";
 
 import resolvers from "../resolvers";
 import typeDefs from "../typeDefs";
-import { Icontext } from "../interface/common";
+import { IContext } from "../interface/common";
 import generateCookiesMiddleware from "../middleware/cookies";
 
 const schema = makeExecutableSchema({
@@ -15,7 +15,7 @@ const apolloServer = new ApolloServer({
 	schema: schema,
 	csrfPrevention: true,
 	cache: "bounded",
-	context: ({ req, res }): Icontext => {
+	context: ({ req, res }): IContext => {
 		const cookieClient = generateCookiesMiddleware({ req, res });
 		return { userData: req.user, cookieClient };
 	},

@@ -20,7 +20,7 @@ model User {
   notifications Notification[]
   address       String
   store         Store?
-  roles         Role[]
+  roles         UsersOnRoles[]
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 }
@@ -35,25 +35,27 @@ model Notification {
 }
 
 model Store {
-  id                 Int       @id @default(autoincrement())
-  isActive           Boolean?  @default(true)
-  products           Product[]
-  orders             Order[]
-  logs               Log[]
-  ownerId            Int       @unique
-  owner              User      @relation(fields: [ownerId], references: [id])
-  oneDayDeliveryExp  DateTime
-  sameDayDeliveryExp DateTime
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
+  id          Int       @id @default(autoincrement())
+  isActive    Boolean?  @default(true)
+  activated   Boolean?  @default(false)
+  products    Product[]
+  orders      Order[]
+  logs        Log[]
+  ownerId     Int       @unique
+  owner       User      @relation(fields: [ownerId], references: [id])
+  preOrderExp DateTime
+  orderExp    DateTime
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 }
 
 model Product {
   id              Int              @id @default(autoincrement())
   name            String           @db.VarChar(255)
   isOrder         Boolean
-  hasADayDelivery Boolean          @default(false)
+  hasPreOrder     Boolean          @default(false)
   basePrice       Int
+  imageUri        String           @db.VarChar(255)
   productContents ProductContent[]
   storeId         Int
   store           Store            @relation(fields: [storeId], references: [id])
@@ -65,7 +67,7 @@ model Order {
   id              Int                   @id @default(autoincrement())
   name            String                @db.VarChar(255)
   isOrder         Boolean
-  isADayDelivery  Boolean
+  isPreOrder      Boolean
   createdAt       DateTime              @default(now())
   storeId         Int
   store           Store                 @relation(fields: [storeId], references: [id])
@@ -76,7 +78,7 @@ model Log {
   id              Int                   @id @default(autoincrement())
   name            String                @db.VarChar(255)
   isOrder         Boolean
-  isADayDelivery  Boolean
+  isPreOrder      Boolean
   createdAt       DateTime              @default(now())
   storeId         Int
   store           Store                 @relation(fields: [storeId], references: [id])
@@ -88,7 +90,7 @@ model ProductContentFixed {
   imageUri ImageUri[]
   quantity Int
   name     String         @db.VarChar(255)
-  price    Int?
+  price    Int
   orderId  Int
   order    Order          @relation(fields: [orderId], references: [id])
   logId    Int
@@ -102,27 +104,29 @@ model ProductContent {
   product   Product    @relation(fields: [productId], references: [id])
   name      String     @db.VarChar(255)
   imageUri  ImageUri[]
-  price     Int?
+  price     Int
   options   Option[]
 }
 
 model Option {
   id               Int            @id @default(autoincrement())
+  name             String
   options          KeyValuePair[]
   productContentId Int
   productContent   ProductContent @relation(fields: [productContentId], references: [id])
 }
 
+// field options
 model KeyValuePair {
-  id                    Int                 @id @default(autoincrement())
-  key                   String              @db.VarChar(255)
-  amount                Int?                @default(0)
+  id                    Int                  @id @default(autoincrement())
+  key                   String               @db.VarChar(255)
+  amount                Int?                 @default(0)
   description           String?
-  isOneDayDelivery      Boolean?            @default(false)
+  isPreOrder            Boolean?             @default(false)
   optionId              Int
-  option                Option              @relation(fields: [optionId], references: [id])
-  productContentFixedId Int
-  productContentFixed   ProductContentFixed @relation(fields: [productContentFixedId], references: [id])
+  option                Option               @relation(fields: [optionId], references: [id])
+  productContentFixedId Int?
+  productContentFixed   ProductContentFixed? @relation(fields: [productContentFixedId], references: [id])
 }
 
 model ImageUri {
@@ -137,10 +141,18 @@ model ImageUri {
 }
 
 model Role {
-  id     Int      @id @default(autoincrement())
-  role   RoleEnum
+  id    Int            @id @default(autoincrement())
+  role  RoleEnum
+  users UsersOnRoles[]
+}
+
+model UsersOnRoles {
   userId Int
-  user   User     @relation(fields: [userId], references: [id])
+  user   User @relation(fields: [userId], references: [id])
+  roleId Int
+  role   Role @relation(fields: [roleId], references: [id])
+
+  @@id([userId, roleId])
 }
 
 enum RoleEnum {

@@ -1,7 +1,7 @@
 import { gql } from "apollo-server-express";
 
 const authTypeDefs = gql`
-	type auth {
+	type Auth {
 		accessToken: String!
 	}
 	input LoginInput {
@@ -9,11 +9,18 @@ const authTypeDefs = gql`
 		password: String!
 	}
 	extend type Query {
-		getAccessToken: auth!
+		getAccessToken: Auth!
+	}
+
+	type LoginMutationResponse implements ReturnMessage {
+		status: Int!
+		success: Boolean!
+		message: String!
+		auth: Auth!
 	}
 
 	extend type Mutation {
-		login(userInput: LoginInput): auth
+		login(userInput: LoginInput): LoginMutationResponse!
 		logout: Boolean!
 	}
 `;

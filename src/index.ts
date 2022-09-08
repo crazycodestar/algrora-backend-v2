@@ -12,7 +12,11 @@ redisClient.on("error", (err) => console.log("redis client error", err));
 
 const main = async () => {
 	const corsOptions = {
-		origin: ["http://localhost:8000", "https://studio.apollographql.com"],
+		origin: [
+			"http://localhost:8000",
+			"https://studio.apollographql.com",
+			"http://localhost:3000",
+		],
 		credentials: true,
 	};
 

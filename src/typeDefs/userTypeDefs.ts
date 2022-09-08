@@ -6,16 +6,21 @@ export default gql`
 		email: String!
 		username: String!
 		activated: Boolean!
+		imageUri: String
 		address: String!
 		ImageUrl: String
 	}
-	input AddUserInput {
+	input SignUpInput {
 		username: String!
 		email: String!
 		password: String!
 		address: String!
 	}
+	input RegisterInput {
+		email: String!
+	}
 	extend type Mutation {
-		addUser(userInput: AddUserInput): User
+		signUp(userInput: SignUpInput): ReturnMessage
+		register(userInput: RegisterInput): ReturnMessage
 	}
 `;
